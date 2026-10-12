@@ -1,0 +1,12 @@
+# XcodeGen の生成物
+*.xcodeproj
+App/Info.plist
+build/
+DerivedData/
+.DS_Store
+
+# Apple の秘密鍵は絶対にコミットしない
+*.p8
+*.p8.txt
+.p8*
+AuthKey_*
