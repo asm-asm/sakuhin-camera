@@ -18,17 +18,15 @@ enum Compositor {
         let pixelCount = original.width * original.height
         var output = [UInt8](repeating: 0, count: pixelCount * 4)
 
-        original.pixels.withUnsafeBufferPointer { src in
-            background.pixels.withUnsafeBufferPointer { bg in
-                mask.values.withUnsafeBufferPointer { m in
-                    output.withUnsafeMutableBufferPointer { dst in
+        original.pixels.withUnsafeBufferPointer { (src: UnsafeBufferPointer<UInt8>) in
+            background.pixels.withUnsafeBufferPointer { (bg: UnsafeBufferPointer<UInt8>) in
+                mask.values.withUnsafeBufferPointer { (m: UnsafeBufferPointer<UInt8>) in
+                    output.withUnsafeMutableBufferPointer { (dst: inout UnsafeMutableBufferPointer<UInt8>) in
                         for i in 0..<pixelCount {
-                            let a = UInt32(m[i])
-                            let inv = 255 - a
+                            let alpha = UInt32(m[i])
                             let base = i * 4
                             for c in base..<(base + 4) {
-                                // a=255 のとき (src×255 + 127) / 255 = src で必ず元の値になる
-                                dst[c] = UInt8((UInt32(bg[c]) * inv + UInt32(src[c]) * a + 127) / 255)
+                                dst[c] = blend(background: bg[c], original: src[c], alpha: alpha)
                             }
                         }
                     }
@@ -38,5 +36,13 @@ enum Compositor {
 
         return RGBAImage(width: original.width, height: original.height,
                          colorSpace: original.colorSpace, pixels: output)
+    }
+
+    /// alpha=255 のとき (original×255 + 127) / 255 = original で必ず元の値になる。
+    @inline(__always)
+    private static func blend(background: UInt8, original: UInt8, alpha: UInt32) -> UInt8 {
+        let bgPart: UInt32 = UInt32(background) * (255 - alpha)
+        let originalPart: UInt32 = UInt32(original) * alpha
+        return UInt8((bgPart + originalPart + 127) / 255)
     }
 }
