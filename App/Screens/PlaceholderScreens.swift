@@ -2,28 +2,6 @@ import SwiftUI
 
 // 画面遷移の骨組み。各画面は実装の段階ごとに別ファイルへ置き換える。
 
-struct CameraScreen: View {
-    let onNext: () -> Void
-
-    @Environment(EditSession.self) private var session
-
-    var body: some View {
-        VStack(spacing: 24) {
-            Text("カメラ画面（段階4で実装）")
-                .foregroundStyle(.secondary)
-            // TODO: 段階4でカメラを実装したら、シミュレータ限定（#if targetEnvironment(simulator)）にする
-            Button("サンプル写真で試す") {
-                session.reset()
-                session.originalImage = SampleImage.load()
-                onNext()
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .navigationTitle("撮影")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
 struct BackgroundScreen: View {
     let onNext: () -> Void
 
