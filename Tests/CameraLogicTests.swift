@@ -105,4 +105,22 @@ final class CameraLogicTests: XCTestCase {
         let tilted = LevelReading.from(gravityX: 0.1, y: 0, z: -0.99)
         XCTAssertFalse(tilted.isLevel)
     }
+
+    // MARK: - 撮影の向き
+
+    func testCaptureOrientationFollowsDeviceTilt() {
+        XCTAssertEqual(CaptureOrientation.from(gravityX: 0, y: -1, z: 0), .portrait)
+        XCTAssertEqual(CaptureOrientation.from(gravityX: 0, y: 1, z: 0), .portraitUpsideDown)
+        XCTAssertEqual(CaptureOrientation.from(gravityX: -1, y: 0, z: 0), .landscapeLeft)
+        XCTAssertEqual(CaptureOrientation.from(gravityX: 1, y: 0, z: 0), .landscapeRight)
+        XCTAssertEqual(CaptureOrientation.portrait.videoRotationAngle, 90)
+        XCTAssertEqual(CaptureOrientation.landscapeLeft.videoRotationAngle, 0)
+    }
+
+    /// 机の作品を真上から撮るときは、少し傾いていても縦写真になる。
+    func testLookingStraightDownIsPortrait() {
+        XCTAssertEqual(CaptureOrientation.from(gravityX: 0.3, y: 0.05, z: -0.95), .portrait)
+        XCTAssertEqual(CaptureOrientation.from(gravityX: -0.2, y: -0.3, z: -0.93), .portrait)
+        XCTAssertTrue(CaptureOrientation.from(gravityX: 0, y: 0, z: -1).isPortrait)
+    }
 }

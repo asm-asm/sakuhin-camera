@@ -105,7 +105,7 @@ final class CameraController: NSObject {
     }
 
     @MainActor
-    func capture() async throws -> CGImage {
+    func capture(orientation: CaptureOrientation) async throws -> CGImage {
         guard status == .running, !isCapturing else { throw CameraError.busy }
         isCapturing = true
         defer { isCapturing = false }
@@ -121,9 +121,8 @@ final class CameraController: NSObject {
         settings.flashMode = .off
 
         if let connection = photoOutput.connection(with: .video),
-           let angle = rotationCoordinator?.videoRotationAngleForHorizonLevelCapture,
-           connection.isVideoRotationAngleSupported(angle) {
-            connection.videoRotationAngle = angle
+           connection.isVideoRotationAngleSupported(orientation.videoRotationAngle) {
+            connection.videoRotationAngle = orientation.videoRotationAngle
         }
 
         let data = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Data, Swift.Error>) in

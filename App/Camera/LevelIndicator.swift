@@ -30,9 +30,40 @@ struct LevelReading: Equatable {
     }
 }
 
+/// 撮影する写真の向き。端末の傾きから決める。
+enum CaptureOrientation: Equatable {
+    case portrait
+    case portraitUpsideDown
+    case landscapeLeft
+    case landscapeRight
+
+    /// 机の作品を真上から撮るとき（端末が水平）は縦向きとみなす。
+    /// iOS の自動判定はこの姿勢で縦横を決められず、横向きの写真になることがあるため。
+    static func from(gravityX x: Double, y: Double, z: Double) -> CaptureOrientation {
+        if abs(z) > 0.85 { return .portrait }
+        if abs(x) > abs(y) {
+            return x < 0 ? .landscapeLeft : .landscapeRight
+        }
+        return y <= 0 ? .portrait : .portraitUpsideDown
+    }
+
+    /// 背面カメラの写真接続に設定する回転角（度）。
+    var videoRotationAngle: CGFloat {
+        switch self {
+        case .portrait: return 90
+        case .portraitUpsideDown: return 270
+        case .landscapeLeft: return 0
+        case .landscapeRight: return 180
+        }
+    }
+
+    var isPortrait: Bool { self == .portrait || self == .portraitUpsideDown }
+}
+
 @Observable
 final class MotionLevel {
     private(set) var reading: LevelReading?
+    private(set) var orientation: CaptureOrientation = .portrait
     @ObservationIgnored private let manager = CMMotionManager()
 
     func start() {
@@ -41,6 +72,10 @@ final class MotionLevel {
         manager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
             guard let gravity = motion?.gravity else { return }
             self?.reading = .from(gravityX: gravity.x, y: gravity.y, z: gravity.z)
+            let orientation = CaptureOrientation.from(gravityX: gravity.x, y: gravity.y, z: gravity.z)
+            if self?.orientation != orientation {
+                self?.orientation = orientation
+            }
         }
     }
 

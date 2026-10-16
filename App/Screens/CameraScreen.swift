@@ -136,6 +136,11 @@ private struct LiveCameraView: View {
             .accessibilityLabel("撮影")
 
             HStack {
+                Label(level.orientation.isPortrait ? "縦" : "横",
+                      systemImage: level.orientation.isPortrait ? "rectangle.portrait" : "rectangle")
+                    .font(.footnote)
+                    .foregroundStyle(.white)
+                    .accessibilityLabel(level.orientation.isPortrait ? "縦向きで撮影" : "横向きで撮影")
                 Spacer()
                 sampleButton
             }
@@ -172,7 +177,7 @@ private struct LiveCameraView: View {
     private func shoot() {
         Task {
             do {
-                let image = try await camera.capture()
+                let image = try await camera.capture(orientation: level.orientation)
                 camera.stop()
                 onCaptured(image)
             } catch {
