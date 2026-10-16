@@ -1,5 +1,4 @@
 import CoreGraphics
-import CoreML
 import CoreVideo
 import Vision
 
@@ -11,15 +10,8 @@ enum SubjectSegmenter {
     }
 
     static func segment(_ image: CGImage) throws -> SubjectSegmentation {
+        // 注意：シミュレータではこのリクエストは被写体を返さない（CPU 指定も非対応）。動作確認は実機で行う。
         let request = VNGenerateForegroundInstanceMaskRequest()
-        #if targetEnvironment(simulator)
-        // シミュレータには Neural Engine がないので CPU で動かす
-        if let cpu = MLComputeDevice.allComputeDevices.first(where: { if case .cpu = $0 { return true } else { return false } }) {
-            for stage in try request.supportedComputeStageDevices.keys {
-                request.setComputeDevice(cpu, for: stage)
-            }
-        }
-        #endif
         let handler = VNImageRequestHandler(cgImage: image, orientation: .up)
         try handler.perform([request])
         guard let observation = request.results?.first, !observation.allInstances.isEmpty else {
