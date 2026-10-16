@@ -5,24 +5,74 @@ import SwiftUI
 struct CameraScreen: View {
     let onNext: () -> Void
 
-    var body: some View {
-        StepPlaceholder(title: "撮影", message: "カメラ画面（段階4で実装）", nextLabel: "次へ", onNext: onNext)
-    }
-}
-
-struct CutoutScreen: View {
-    let onNext: () -> Void
+    @Environment(EditSession.self) private var session
 
     var body: some View {
-        StepPlaceholder(title: "切り抜き", message: "切り抜き画面（段階3で実装）", nextLabel: "次へ", onNext: onNext)
+        VStack(spacing: 24) {
+            Text("カメラ画面（段階4で実装）")
+                .foregroundStyle(.secondary)
+            // TODO: 段階4でカメラを実装したら、シミュレータ限定（#if targetEnvironment(simulator)）にする
+            Button("サンプル写真で試す") {
+                session.reset()
+                session.originalImage = SampleImage.load()
+                onNext()
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .navigationTitle("撮影")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
 struct BackgroundScreen: View {
     let onNext: () -> Void
 
+    @Environment(EditSession.self) private var session
+    @State private var preview: CGImage?
+
     var body: some View {
-        StepPlaceholder(title: "背景", message: "背景画面（段階5で実装）", nextLabel: "次へ", onNext: onNext)
+        VStack(spacing: 16) {
+            Group {
+                if let preview {
+                    Image(decorative: preview, scale: 1)
+                        .resizable()
+                        .scaledToFit()
+                } else {
+                    ProgressView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            Text("背景画面（段階5で実装）。今は単色背景との合成を表示しています")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            Button("次へ", action: onNext)
+                .buttonStyle(.borderedProminent)
+        }
+        .padding()
+        .navigationTitle("背景")
+        .navigationBarTitleDisplayMode(.inline)
+        .task {
+            guard preview == nil, let image = session.originalImage, let mask = session.mask else { return }
+            preview = await Task.detached(priority: .userInitiated) {
+                Self.compositeOnPlainBackground(image: image, mask: mask)
+            }.value
+        }
+    }
+
+    private static func compositeOnPlainBackground(image: CGImage, mask: AlphaMask) -> CGImage? {
+        guard let original = try? RGBAImage(cgImage: image) else { return nil }
+        let color: [UInt8] = [236, 240, 244, 255]
+        var pixels = [UInt8](repeating: 0, count: original.pixels.count)
+        for i in stride(from: 0, to: pixels.count, by: 4) {
+            pixels[i] = color[0]
+            pixels[i + 1] = color[1]
+            pixels[i + 2] = color[2]
+            pixels[i + 3] = color[3]
+        }
+        let background = RGBAImage(width: original.width, height: original.height,
+                                   colorSpace: original.colorSpace, pixels: pixels)
+        return try? Compositor.composite(original: original, mask: mask, background: background).makeCGImage()
     }
 }
 
@@ -30,24 +80,13 @@ struct ExportScreen: View {
     let onFinish: () -> Void
 
     var body: some View {
-        StepPlaceholder(title: "書き出し", message: "書き出し画面（段階7で実装）", nextLabel: "最初に戻る", onNext: onFinish)
-    }
-}
-
-private struct StepPlaceholder: View {
-    let title: String
-    let message: String
-    let nextLabel: String
-    let onNext: () -> Void
-
-    var body: some View {
         VStack(spacing: 24) {
-            Text(message)
+            Text("書き出し画面（段階7で実装）")
                 .foregroundStyle(.secondary)
-            Button(nextLabel, action: onNext)
+            Button("最初に戻る", action: onFinish)
                 .buttonStyle(.borderedProminent)
         }
-        .navigationTitle(title)
+        .navigationTitle("書き出し")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
