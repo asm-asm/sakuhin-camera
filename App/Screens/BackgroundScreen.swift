@@ -235,7 +235,7 @@ private struct BackgroundTile: View {
         }
     }
 
-    private static func makeThumbnail(item: BackgroundItem, library: BackgroundLibrary, original: CGImage?) -> CGImage? {
+    nonisolated private static func makeThumbnail(item: BackgroundItem, library: BackgroundLibrary, original: CGImage?) -> CGImage? {
         if let url = library.fileURL(for: item) {
             guard let source = CGImageSourceCreateWithURL(url as CFURL, nil) else { return nil }
             let options: [CFString: Any] = [
