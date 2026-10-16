@@ -1,0 +1,19 @@
+[
+  { "id": "wood_01", "name": "明るい木のテーブル", "category": "wood", "file": "wood_01.jpg", "premium": false, "aiGenerated": false },
+  { "id": "wood_02", "name": "ダークウッド", "category": "wood", "file": "wood_02.jpg", "premium": true, "aiGenerated": false },
+  { "id": "fabric_01", "name": "生成りのリネン", "category": "fabric", "file": "fabric_01.jpg", "premium": false, "aiGenerated": false },
+  { "id": "fabric_02", "name": "グレーのニット", "category": "fabric", "file": "fabric_02.jpg", "premium": true, "aiGenerated": false },
+  { "id": "cafe_01", "name": "カフェの灯り", "category": "cafe", "file": "cafe_01.jpg", "premium": false, "aiGenerated": false },
+  { "id": "cafe_02", "name": "大理石のカウンター", "category": "cafe", "file": "cafe_02.jpg", "premium": true, "aiGenerated": false },
+  { "id": "outdoor_01", "name": "木漏れ日", "category": "outdoor", "file": "outdoor_01.jpg", "premium": true, "aiGenerated": false },
+  { "id": "outdoor_02", "name": "青空と芝生", "category": "outdoor", "file": "outdoor_02.jpg", "premium": true, "aiGenerated": false },
+  { "id": "solid_white", "name": "白", "category": "plain", "color": "#FFFFFF", "premium": false, "aiGenerated": false },
+  { "id": "solid_cream", "name": "クリーム", "category": "plain", "color": "#F4EEE2", "premium": false, "aiGenerated": false },
+  { "id": "solid_gray", "name": "グレー", "category": "plain", "color": "#D9DBDE", "premium": false, "aiGenerated": false },
+  { "id": "solid_pink", "name": "くすみピンク", "category": "plain", "color": "#E8CFCB", "premium": true, "aiGenerated": false },
+  { "id": "solid_sage", "name": "セージ", "category": "plain", "color": "#C9D3C0", "premium": true, "aiGenerated": false },
+  { "id": "solid_black", "name": "黒", "category": "plain", "color": "#1E1E20", "premium": true, "aiGenerated": false },
+  { "id": "gradient_peach", "name": "ピーチ", "category": "plain", "gradient": ["#FBE3D6", "#F1C7B5"], "premium": false, "aiGenerated": false },
+  { "id": "gradient_sky", "name": "空色", "category": "plain", "gradient": ["#DDEBF7", "#B8D2EC"], "premium": true, "aiGenerated": false },
+  { "id": "blur_original", "name": "元の背景をぼかす", "category": "plain", "blurOriginal": true, "premium": false, "aiGenerated": false }
+]

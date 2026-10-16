@@ -6,6 +6,7 @@ struct CameraScreen: View {
     let onNext: () -> Void
 
     @Environment(EditSession.self) private var session
+    @State private var showsSettings = false
 
     var body: some View {
         Group {
@@ -23,6 +24,19 @@ struct CameraScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.black, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showsSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .accessibilityLabel("設定")
+            }
+        }
+        .sheet(isPresented: $showsSettings) {
+            SettingsView()
+        }
     }
 }
 

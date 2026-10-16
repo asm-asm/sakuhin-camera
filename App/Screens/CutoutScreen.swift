@@ -163,7 +163,7 @@ struct CutoutScreen: View {
         Task {
             do {
                 guard let mask = try await model.makeMask() else { return }
-                session.mask = mask
+                session.baseMask = mask
                 onNext()
             } catch {
                 errorMessage = error.localizedDescription

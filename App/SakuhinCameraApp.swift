@@ -2,9 +2,15 @@ import SwiftUI
 
 @main
 struct SakuhinCameraApp: App {
+    @State private var store = SubscriptionStore()
+
     var body: some Scene {
         WindowGroup {
             RootView()
+                .environment(store)
+                .task {
+                    await store.start()
+                }
         }
     }
 }
@@ -19,7 +25,9 @@ struct RootView: View {
                 .navigationDestination(for: Route.self) { route in
                     switch route {
                     case .cutout:
-                        CutoutScreen(onNext: { path.append(.background) })
+                        CutoutScreen(onNext: { path.append(.refine) })
+                    case .refine:
+                        RefineScreen(onNext: { path.append(.background) })
                     case .background:
                         BackgroundScreen(onNext: { path.append(.export) })
                     case .export:

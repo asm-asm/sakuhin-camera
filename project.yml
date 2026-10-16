@@ -16,6 +16,9 @@ targets:
     platform: iOS
     sources:
       - App
+      # 背景素材（画像と manifest.json）をフォルダごと同梱する
+      - path: Backgrounds
+        type: folder
     info:
       path: App/Info.plist
       properties:
