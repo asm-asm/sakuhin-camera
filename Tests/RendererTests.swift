@@ -70,7 +70,7 @@ final class RendererTests: XCTestCase {
         composition.ratio = .square
         composition.adjustments = BackgroundAdjustments(brightness: 0.6, temperature: -0.8, blur: 0.5)
         composition.shadow = ShadowSettings(isEnabled: true, opacity: 0.9, blur: 0.7, offset: 1)
-        let background = try decodeItem(#"{"id":"g","name":"g","category":"plain","gradient":["#FF8800","#2244FF"],"premium":false,"aiGenerated":false}"#)
+        let background = try decodeItem(##"{"id":"g","name":"g","category":"plain","gradient":["#FF8800","#2244FF"],"premium":false,"aiGenerated":false}"##)
 
         let output = try Renderer.render(original: original, originalImage: originalImage, mask: mask,
                                          background: background, library: BackgroundLibrary.shared,
@@ -100,7 +100,7 @@ final class RendererTests: XCTestCase {
 
     /// Core Image の上下（y 軸）が書き出しで逆にならないこと。
     func testGradientTopColorIsAtTop() throws {
-        let item = try decodeItem(#"{"id":"g","name":"g","category":"plain","gradient":["#FF0000","#0000FF"],"premium":false,"aiGenerated":false}"#)
+        let item = try decodeItem(##"{"id":"g","name":"g","category":"plain","gradient":["#FF0000","#0000FF"],"premium":false,"aiGenerated":false}"##)
         let image = Renderer.backgroundCIImage(item: item, library: BackgroundLibrary.shared,
                                                canvasSize: CGSize(width: 10, height: 20),
                                                adjustments: BackgroundAdjustments(), originalImage: nil)
@@ -113,7 +113,7 @@ final class RendererTests: XCTestCase {
     }
 
     func testTemperatureWarmsAndCools() throws {
-        let item = try decodeItem(#"{"id":"s","name":"s","category":"plain","color":"#999999","premium":false,"aiGenerated":false}"#)
+        let item = try decodeItem(##"{"id":"s","name":"s","category":"plain","color":"#999999","premium":false,"aiGenerated":false}"##)
         func render(_ temperature: Double) throws -> [UInt8] {
             let image = Renderer.backgroundCIImage(item: item, library: BackgroundLibrary.shared,
                                                    canvasSize: CGSize(width: 4, height: 4),

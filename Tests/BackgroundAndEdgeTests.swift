@@ -30,11 +30,11 @@ final class BackgroundLibraryTests: XCTestCase {
         func decode(_ json: String) throws -> BackgroundItem {
             try JSONDecoder().decode(BackgroundItem.self, from: Data(json.utf8))
         }
-        let solid = try decode(#"{"id":"a","name":"a","category":"plain","color":"#FF8000","premium":false,"aiGenerated":false}"#)
+        let solid = try decode(##"{"id":"a","name":"a","category":"plain","color":"#FF8000","premium":false,"aiGenerated":false}"##)
         XCTAssertEqual(solid.kind, .solid(try XCTUnwrap(RGBColor(hex: "#FF8000"))))
-        let blur = try decode(#"{"id":"b","name":"b","category":"plain","blurOriginal":true,"premium":false,"aiGenerated":false}"#)
+        let blur = try decode(##"{"id":"b","name":"b","category":"plain","blurOriginal":true,"premium":false,"aiGenerated":false}"##)
         XCTAssertEqual(blur.kind, .blurredOriginal)
-        let broken = try decode(#"{"id":"c","name":"c","category":"plain","color":"red","premium":false,"aiGenerated":false}"#)
+        let broken = try decode(##"{"id":"c","name":"c","category":"plain","color":"red","premium":false,"aiGenerated":false}"##)
         XCTAssertNil(broken.kind)
     }
 
