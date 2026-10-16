@@ -15,7 +15,7 @@ enum SubjectSegmenter {
         #if targetEnvironment(simulator)
         // シミュレータには Neural Engine がないので CPU で動かす
         if let cpu = MLComputeDevice.allComputeDevices.first(where: { if case .cpu = $0 { return true } else { return false } }) {
-            for stage in try request.supportedComputeStageDevices().keys {
+            for stage in try request.supportedComputeStageDevices.keys {
                 request.setComputeDevice(cpu, for: stage)
             }
         }
