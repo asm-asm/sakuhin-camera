@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import ImageIO
 
 /// 同梱のサンプル写真（木のテーブルに編みコースターと刺繍ポーチ）。
