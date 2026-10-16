@@ -99,8 +99,12 @@ final class SegmentationTests: XCTestCase {
         do {
             segmentation = try SubjectSegmenter.segment(image)
         } catch SubjectSegmenter.Error.noSubject {
+            #if targetEnvironment(simulator)
+            throw XCTSkip("シミュレータでは Vision が被写体を返さない（実機で確認する）")
+            #else
             XCTFail("サンプル写真から被写体が見つからなかった")
             return
+            #endif
         } catch {
             throw XCTSkip("この環境では Vision の切り抜きが使えない: \(error)")
         }
