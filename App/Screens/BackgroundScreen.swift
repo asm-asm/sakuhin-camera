@@ -15,6 +15,7 @@ struct BackgroundScreen: View {
     @Environment(EditSession.self) private var session
     @Environment(SubscriptionStore.self) private var store
     @State private var panel: Panel = .background
+    /// 選んでいるカテゴリ。nil なら「すべて」。
     @State private var category: String?
     @State private var showsPaywall = false
 
@@ -68,9 +69,6 @@ struct BackgroundScreen: View {
             if library.item(id: session.composition.backgroundID) == nil {
                 session.composition.backgroundID = library.defaultItem?.id
             }
-            if category == nil {
-                category = library.item(id: session.composition.backgroundID)?.category ?? library.categories.first
-            }
         }
     }
 
@@ -98,6 +96,13 @@ struct BackgroundScreen: View {
         VStack(alignment: .leading, spacing: 8) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
+                    Button("すべて") {
+                        category = nil
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(category == nil ? .accentColor : .gray)
+                    .controlSize(.small)
+
                     ForEach(library.categories, id: \.self) { name in
                         Button(BackgroundLibrary.displayName(ofCategory: name)) {
                             category = name
@@ -111,7 +116,7 @@ struct BackgroundScreen: View {
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 10) {
-                    ForEach(library.items(in: category ?? "")) { item in
+                    ForEach(category.map(library.items(in:)) ?? library.items) { item in
                         BackgroundTile(item: item,
                                        isSelected: session.composition.backgroundID == item.id,
                                        isLocked: item.premium && !store.isPremium) {
