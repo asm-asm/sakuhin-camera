@@ -50,8 +50,26 @@ struct RootView: View {
                 }
         }
         .environment(session)
+        .onAppear(perform: startDemoSceneIfNeeded)
         .sheet(isPresented: $showsPaywallOnLaunch) {
             PaywallView()
+        }
+    }
+
+    /// スクリーンショット撮影モード：本物の写真とマスクを入れて、指定の画面まで進める。
+    private func startDemoSceneIfNeeded() {
+        guard let scene = DemoContent.scene, let demo = DemoContent.shared, session.originalImage == nil else { return }
+        session.originalImage = demo.photo
+        session.baseMask = demo.mask
+        session.setMask(demo.mask)
+        if let backgroundID = DemoContent.backgroundID {
+            session.composition.backgroundID = backgroundID
+        }
+        switch scene {
+        case .preview: path = []
+        case .cutout: path = [.cutout]
+        case .background: path = [.cutout, .refine, .background]
+        case .export: path = [.cutout, .refine, .background, .export]
         }
     }
 }

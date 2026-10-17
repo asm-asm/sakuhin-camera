@@ -16,6 +16,11 @@ final class SubscriptionStore {
     @ObservationIgnored private var updatesTask: Task<Void, Never>?
 
     func start() async {
+        if DemoContent.isPremium {
+            // スクリーンショット撮影モード：プレミアムの見た目で撮る
+            isPremium = true
+            return
+        }
         if updatesTask == nil {
             updatesTask = Task { [weak self] in
                 for await update in Transaction.updates {

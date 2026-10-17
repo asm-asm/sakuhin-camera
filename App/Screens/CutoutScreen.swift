@@ -16,6 +16,10 @@ final class CutoutModel {
     private(set) var selected: IndexSet = []
     private(set) var overlay: CGImage?
     private(set) var isMakingMask = false
+    /// スクリーンショット用：Vision の代わりに、あらかじめ Vision で作ったマスクと被写体番号を使う。
+    @ObservationIgnored private var precomputed: (labels: InstanceLabelMap, mask: AlphaMask)?
+
+    private var labels: InstanceLabelMap? { segmentation?.labels ?? precomputed?.labels }
 
     var canProceed: Bool {
         if case .ready = phase { return !selected.isEmpty && !isMakingMask }
@@ -27,7 +31,7 @@ final class CutoutModel {
         case .idle, .detecting:
             return "作品を探しています…"
         case .ready:
-            let count = segmentation?.instances.count ?? 0
+            let count = segmentation?.instances.count ?? Set(precomputed?.labels.labels ?? []).subtracting([0]).count
             if count <= 1 { return "作品を切り抜きました" }
             return "\(count)個の被写体が見つかりました。タップで選択・解除できます（白くかすんでいるものは使いません）"
         case .noSubject:
@@ -55,8 +59,15 @@ final class CutoutModel {
         }
     }
 
+    func showPrecomputed(labels: InstanceLabelMap, mask: AlphaMask) {
+        precomputed = (labels, mask)
+        selected = IndexSet(Set(labels.labels).subtracting([0]).map(Int.init))
+        refreshOverlay()
+        phase = .ready
+    }
+
     func toggle(atNormalized point: CGPoint) {
-        guard case .ready = phase, let index = segmentation?.labels.instance(atNormalized: point) else { return }
+        guard case .ready = phase, let index = labels?.instance(atNormalized: point) else { return }
         if selected.contains(index) {
             selected.remove(index)
         } else {
@@ -66,6 +77,7 @@ final class CutoutModel {
     }
 
     func makeMask() async throws -> AlphaMask? {
+        if let precomputed { return precomputed.mask }
         guard let segmentation, !selected.isEmpty else { return nil }
         isMakingMask = true
         defer { isMakingMask = false }
@@ -76,7 +88,7 @@ final class CutoutModel {
     }
 
     private func refreshOverlay() {
-        overlay = segmentation?.labels.overlayImage(selected: selected)
+        overlay = labels?.overlayImage(selected: selected)
     }
 }
 
@@ -109,7 +121,9 @@ struct CutoutScreen: View {
         .navigationTitle("切り抜き")
         .navigationBarTitleDisplayMode(.inline)
         .task {
-            if let image = session.originalImage {
+            if let demo = DemoContent.shared {
+                model.showPrecomputed(labels: demo.labels, mask: demo.mask)
+            } else if let image = session.originalImage {
                 await model.detect(image)
             }
         }
