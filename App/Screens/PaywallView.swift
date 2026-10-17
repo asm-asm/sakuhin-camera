@@ -17,6 +17,9 @@ struct PaywallView: View {
     static let orange = Color(red: 1.0, green: 0.62, blue: 0.40)
     static let yellow = Color(red: 1.0, green: 0.80, blue: 0.38)
     static let cream = Color(red: 1.0, green: 0.97, blue: 0.94)
+    /// 文字色。ダークモードでも白いカードの上で読めるよう、端末の設定によらず固定する。
+    static let ink = Color(red: 0.20, green: 0.16, blue: 0.16)
+    static let subInk = Color(red: 0.45, green: 0.40, blue: 0.40)
     static let popGradient = LinearGradient(colors: [pink, orange, yellow],
                                             startPoint: .topLeading, endPoint: .bottomTrailing)
 
@@ -53,8 +56,9 @@ struct PaywallView: View {
             .padding(16)
             .accessibilityLabel("閉じる")
         }
-        // 白いカードの明るいデザインなので、ダークモードの端末でも文字色はライトモードにする
+        // 白いカードの明るいデザインなので、ダークモードの端末でもライトモードで表示する
         .environment(\.colorScheme, .light)
+        .preferredColorScheme(.light)
         .alert("お知らせ", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -188,9 +192,10 @@ struct PaywallView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(Self.ink)
                 Text(detail)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Self.subInk)
             }
             Spacer(minLength: 0)
         }
@@ -218,14 +223,15 @@ struct PaywallView: View {
         if store.products.isEmpty {
             VStack(spacing: 10) {
                 if store.isLoadingProducts {
-                    ProgressView()
+                    ProgressView().tint(Self.subInk)
                 } else {
                     Text("プランを読み込めませんでした。通信環境を確認してください。")
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Self.subInk)
                     Button("再読み込み") {
                         Task { await store.loadProducts() }
                     }
+                    .tint(Self.pink)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -258,11 +264,12 @@ struct PaywallView: View {
             HStack(spacing: 12) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
-                    .foregroundStyle(isSelected ? Self.pink : Color.secondary)
+                    .foregroundStyle(isSelected ? Self.pink : Self.subInk)
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Text(title)
                             .font(.system(.headline, design: .rounded))
+                            .foregroundStyle(Self.ink)
                         if let savings {
                             Text(savings)
                                 .font(.caption2.weight(.bold))
@@ -274,11 +281,12 @@ struct PaywallView: View {
                     }
                     Text(detail)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Self.subInk)
                 }
                 Spacer(minLength: 0)
                 Text(product.displayPrice + period)
                     .font(.system(.headline, design: .rounded).weight(.bold))
+                    .foregroundStyle(Self.ink)
             }
             .padding(16)
             .background(RoundedRectangle(cornerRadius: 20).fill(.white))
@@ -344,10 +352,11 @@ struct PaywallView: View {
                 Task { await restore() }
             }
             .font(.footnote.weight(.semibold))
+            .tint(Self.pink)
 
             Text("サブスクリプションは、現在の期間が終わる24時間前までに解約しない限り自動で更新されます。料金は購入の確定時と更新時に Apple ID に請求されます。解約は「設定」アプリの Apple ID ＞ サブスクリプションから行えます。")
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Self.subInk)
                 .multilineTextAlignment(.center)
 
             HStack(spacing: 20) {
@@ -355,6 +364,7 @@ struct PaywallView: View {
                 Button("プライバシーポリシー") { showsPrivacy = true }
             }
             .font(.caption)
+            .tint(Self.pink)
         }
         .padding(.horizontal, 24)
     }
