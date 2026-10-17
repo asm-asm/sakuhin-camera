@@ -53,7 +53,7 @@ struct BackgroundScreen: View {
                 case .shadow: shadowPanel
                 }
             }
-            .frame(height: 170)
+            .frame(height: 214)
 
             Button("次へ", action: onNext)
                 .buttonStyle(.borderedProminent)
@@ -115,7 +115,8 @@ struct BackgroundScreen: View {
                 .padding(.horizontal)
             }
             ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 10) {
+                // 2段に並べて、たくさんの背景を少ないスクロールで見られるようにする
+                LazyHGrid(rows: [GridItem(.fixed(84), spacing: 6), GridItem(.fixed(84))], spacing: 8) {
                     ForEach(category.map(library.items(in:)) ?? library.items) { item in
                         BackgroundTile(item: item,
                                        isSelected: session.composition.backgroundID == item.id,
@@ -198,7 +199,7 @@ private struct BackgroundTile: View {
 
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 4) {
+            VStack(spacing: 3) {
                 ZStack(alignment: .topTrailing) {
                     Group {
                         if let thumbnail {
@@ -209,7 +210,7 @@ private struct BackgroundTile: View {
                             Color(white: 0.9)
                         }
                     }
-                    .frame(width: 66, height: 88)
+                    .frame(width: 52, height: 68)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
@@ -227,7 +228,7 @@ private struct BackgroundTile: View {
                 Text(item.name)
                     .font(.caption2)
                     .lineLimit(1)
-                    .frame(width: 70)
+                    .frame(width: 58)
             }
         }
         .buttonStyle(.plain)
