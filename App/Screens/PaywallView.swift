@@ -19,7 +19,7 @@ struct PlanOption: Identifiable, Equatable {
             if let monthly, monthly.price > 0 {
                 let full = monthly.price * 12
                 let ratio: Decimal = (full - yearly.price) / full * 100
-                let percent = NSDecimalNumber(decimal: ratio).intValue
+                let percent = Int(NSDecimalNumber(decimal: ratio).doubleValue.rounded())
                 if percent > 0 { savings = "\(percent)%おトク" }
             }
             options.append(PlanOption(id: yearly.id, title: "年額プラン", price: yearly.displayPrice + " / 年",
@@ -34,9 +34,9 @@ struct PlanOption: Identifiable, Equatable {
     }
 
     static let demo: [PlanOption] = [
-        PlanOption(id: ProductIDs.yearly, title: "年額プラン", price: "¥3,000 / 年", detail: "月あたり ¥250",
-                   badge: "いちばんおトク", savings: "50%おトク"),
-        PlanOption(id: ProductIDs.monthly, title: "月額プラン", price: "¥500 / 月", detail: "まずは1か月から",
+        PlanOption(id: ProductIDs.yearly, title: "年額プラン", price: "¥1,500 / 年", detail: "月あたり ¥125",
+                   badge: "いちばんおトク", savings: "17%おトク"),
+        PlanOption(id: ProductIDs.monthly, title: "月額プラン", price: "¥150 / 月", detail: "まずは1か月から",
                    badge: nil, savings: nil),
     ]
 }
