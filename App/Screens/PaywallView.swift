@@ -53,6 +53,8 @@ struct PaywallView: View {
             .padding(16)
             .accessibilityLabel("閉じる")
         }
+        // 白いカードの明るいデザインなので、ダークモードの端末でも文字色はライトモードにする
+        .environment(\.colorScheme, .light)
         .alert("お知らせ", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
             Button("OK", role: .cancel) {}
         } message: {
