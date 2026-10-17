@@ -270,6 +270,12 @@ struct PaywallView: View {
                         .font(.system(size: 14))
                         .foregroundStyle(Palette.subInk)
                         .multilineTextAlignment(.center)
+                    if let reason = store.loadErrorDescription {
+                        Text(reason)
+                            .font(.system(size: 11))
+                            .foregroundStyle(Palette.subInk)
+                            .multilineTextAlignment(.center)
+                    }
                     Button("再読み込み") {
                         Task { await store.loadProducts() }
                     }
@@ -436,9 +442,7 @@ struct PaywallView: View {
 
     private func buy() async {
         guard let product = selectedProduct else {
-            let reason = store.loadErrorDescription.map { "
-
-理由：\($0)" } ?? ""
+            let reason = store.loadErrorDescription.map { "\n\n理由：\($0)" } ?? ""
             message = "プランを読み込めていません。少し待ってから、もう一度お試しください。\(reason)"
             Task { await store.loadProducts() }
             return
