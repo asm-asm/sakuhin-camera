@@ -236,17 +236,21 @@ private struct BackgroundTile: View {
             let original = session.originalImage
             let library = BackgroundLibrary.shared
             thumbnail = await Task.detached(priority: .utility) {
-                Self.makeThumbnail(item: item, library: library, original: original)
+                BackgroundThumbnail.make(item: item, library: library, original: original)
             }.value
         }
     }
+}
 
-    nonisolated private static func makeThumbnail(item: BackgroundItem, library: BackgroundLibrary, original: CGImage?) -> CGImage? {
+/// 背景一覧・購入画面で使うサムネイル。
+enum BackgroundThumbnail {
+    static func make(item: BackgroundItem, library: BackgroundLibrary, original: CGImage?,
+                     maxPixelSize: Int = 240) -> CGImage? {
         if let url = library.fileURL(for: item) {
             guard let source = CGImageSourceCreateWithURL(url as CFURL, nil) else { return nil }
             let options: [CFString: Any] = [
                 kCGImageSourceCreateThumbnailFromImageAlways: true,
-                kCGImageSourceThumbnailMaxPixelSize: 240,
+                kCGImageSourceThumbnailMaxPixelSize: maxPixelSize,
                 kCGImageSourceCreateThumbnailWithTransform: true,
             ]
             return CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary)
@@ -255,3 +259,4 @@ private struct BackgroundTile: View {
                                           adjustments: BackgroundAdjustments(), originalImage: original)
     }
 }
+
