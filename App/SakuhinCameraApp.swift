@@ -21,6 +21,8 @@ enum LaunchOptions {
     static let showsPaywall = ProcessInfo.processInfo.arguments.contains("-showPaywall")
     /// ストアに接続せず、見本の料金でプランを表示する。
     static let paywallDemo = ProcessInfo.processInfo.arguments.contains("-paywallDemo")
+    /// プレミアム画面をプランの位置までスクロールする。
+    static let paywallScrollToPlans = ProcessInfo.processInfo.arguments.contains("-paywallScrollToPlans")
 }
 
 struct RootView: View {

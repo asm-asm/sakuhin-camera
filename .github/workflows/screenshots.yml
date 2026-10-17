@@ -51,6 +51,10 @@ jobs:
             sleep 8
             xcrun simctl io "$UDID" screenshot "shots/paywall_$mode.png"
             xcrun simctl terminate "$UDID" com.sammy.sakuhincamera || true
+            xcrun simctl launch "$UDID" com.sammy.sakuhincamera -showPaywall -paywallDemo -paywallScrollToPlans
+            sleep 8
+            xcrun simctl io "$UDID" screenshot "shots/paywall_plans_$mode.png"
+            xcrun simctl terminate "$UDID" com.sammy.sakuhincamera || true
           done
 
       - uses: actions/upload-artifact@v4

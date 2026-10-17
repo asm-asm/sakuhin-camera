@@ -71,6 +71,7 @@ struct PaywallView: View {
     }
 
     var body: some View {
+        ScrollViewReader { proxy in
         ScrollView {
             VStack(spacing: 28) {
                 header
@@ -80,6 +81,7 @@ struct PaywallView: View {
                     premiumActive
                 } else {
                     planList
+                        .id("plans")
                     purchaseButton
                 }
                 footer
@@ -89,6 +91,13 @@ struct PaywallView: View {
             .frame(maxWidth: .infinity)
         }
         .scrollIndicators(.hidden)
+        .task {
+            if LaunchOptions.paywallScrollToPlans {
+                try? await Task.sleep(for: .milliseconds(600))
+                proxy.scrollTo("plans", anchor: .center)
+            }
+        }
+        }
         .background(
             LinearGradient(colors: [Palette.peach, Palette.cream], startPoint: .top, endPoint: .center)
                 .ignoresSafeArea()
@@ -220,7 +229,7 @@ struct PaywallView: View {
                        title: "すべての背景が使える", detail: "スタイリング背景10種＋すべてのカラー")
             Divider().padding(.leading, 74)
             benefitRow(icon: "hand.raised.fill", color: Palette.mint,
-                       title: "作品は撮ったまま", detail: "変えるのは背景だけ。作品の画素はいじりません")
+                       title: "作品は撮ったまま", detail: "変えるのは背景だけ。作品には手を加えません")
         }
         .background(RoundedRectangle(cornerRadius: 22).fill(.white))
         .shadow(color: .black.opacity(0.06), radius: 10, y: 4)
@@ -294,27 +303,31 @@ struct PaywallView: View {
                     .font(.system(size: 24))
                     .foregroundStyle(isSelected ? Palette.pink : Palette.subInk.opacity(0.6))
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Text(plan.title)
-                            .font(.system(size: 17, weight: .bold, design: .rounded))
-                            .foregroundStyle(Palette.ink)
-                        if let savings = plan.savings {
-                            Text(savings)
-                                .font(.system(size: 11, weight: .heavy))
-                                .foregroundStyle(Palette.pink)
-                                .padding(.horizontal, 7)
-                                .padding(.vertical, 3)
-                                .background(Capsule().fill(Palette.pink.opacity(0.12)))
-                        }
-                    }
+                    Text(plan.title)
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .foregroundStyle(Palette.ink)
+                        .fixedSize()
                     Text(plan.detail)
                         .font(.system(size: 13))
                         .foregroundStyle(Palette.subInk)
+                        .fixedSize()
                 }
                 Spacer(minLength: 8)
-                Text(plan.price)
-                    .font(.system(size: 17, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Palette.ink)
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(plan.price)
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Palette.ink)
+                        .fixedSize()
+                    if let savings = plan.savings {
+                        Text(savings)
+                            .font(.system(size: 11, weight: .heavy))
+                            .foregroundStyle(Palette.pink)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(Palette.pink.opacity(0.12)))
+                            .fixedSize()
+                    }
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 18)
