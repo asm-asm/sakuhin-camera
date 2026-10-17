@@ -48,6 +48,7 @@ struct PlanOption: Identifiable, Equatable {
 struct PaywallView: View {
     @Environment(SubscriptionStore.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.purchase) private var purchase
     /// タップで選んだプラン。まだ選んでいなければ先頭（年額）を選んだことにする。
     @State private var selectedID: String?
     @State private var isPurchasing = false
@@ -374,8 +375,9 @@ struct PaywallView: View {
             .shadow(color: Palette.pink.opacity(0.4), radius: 12, y: 6)
         }
         .buttonStyle(.plain)
-        .disabled(isPurchasing || selectedProduct == nil)
-        .opacity(selectedProduct == nil ? 0.45 : 1)
+        // 商品が読み込めていなくても押せるようにし、押したら理由を表示する
+        .disabled(isPurchasing)
+        .opacity(selectedProduct == nil ? 0.6 : 1)
         .padding(.horizontal, 20)
     }
 
@@ -433,12 +435,27 @@ struct PaywallView: View {
     }
 
     private func buy() async {
-        guard let product = selectedProduct else { return }
+        guard let product = selectedProduct else {
+            let reason = store.loadErrorDescription.map { "
+
+理由：\($0)" } ?? ""
+            message = "プランを読み込めていません。少し待ってから、もう一度お試しください。\(reason)"
+            Task { await store.loadProducts() }
+            return
+        }
         isPurchasing = true
         defer { isPurchasing = false }
         do {
-            if try await store.purchase(product) {
+            let result = try await purchase(product)
+            switch await store.handle(result) {
+            case .purchased:
                 dismiss()
+            case .cancelled:
+                break
+            case .pending:
+                message = "購入の承認待ちです。承認されるとプレミアムが使えるようになります。"
+            case .unverified:
+                message = "購入を確認できませんでした。「購入を復元」をお試しください。"
             }
         } catch {
             message = "購入できませんでした（\(error.localizedDescription)）"

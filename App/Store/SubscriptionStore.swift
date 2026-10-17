@@ -10,6 +10,8 @@ final class SubscriptionStore {
     private(set) var isPremium = false
     private(set) var isLoadingProducts = false
     private(set) var loadFailed = false
+    /// 読み込みに失敗した理由（画面に出して原因を調べられるようにする）。
+    private(set) var loadErrorDescription: String?
 
     @ObservationIgnored private var updatesTask: Task<Void, Never>?
 
@@ -35,24 +37,35 @@ final class SubscriptionStore {
         do {
             products = try await Product.products(for: ProductIDs.all).sorted { $0.price < $1.price }
             loadFailed = products.isEmpty
+            loadErrorDescription = products.isEmpty ? "ストアから商品が返ってきませんでした（0件）" : nil
         } catch {
             loadFailed = true
+            loadErrorDescription = error.localizedDescription
         }
     }
 
-    /// 購入できたら true。キャンセル・保留は false。
-    func purchase(_ product: Product) async throws -> Bool {
-        let result = try await product.purchase()
+    enum PurchaseOutcome: Equatable {
+        case purchased
+        case cancelled
+        case pending
+        case unverified
+    }
+
+    /// 購入の結果を処理する。購入自体は画面側の `@Environment(\.purchase)` で行う
+    /// （画面に結びつけないと、購入の確認画面が出ずにキャンセル扱いになることがあるため）。
+    func handle(_ result: Product.PurchaseResult) async -> PurchaseOutcome {
         switch result {
         case .success(let verification):
-            guard case .verified(let transaction) = verification else { return false }
+            guard case .verified(let transaction) = verification else { return .unverified }
             await transaction.finish()
             await refreshEntitlements()
-            return true
-        case .pending, .userCancelled:
-            return false
+            return .purchased
+        case .pending:
+            return .pending
+        case .userCancelled:
+            return .cancelled
         @unknown default:
-            return false
+            return .cancelled
         }
     }
 
