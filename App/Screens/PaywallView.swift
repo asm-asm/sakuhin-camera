@@ -229,7 +229,7 @@ struct PaywallView: View {
                        title: "すべての背景が使える", detail: "スタイリング背景10種＋すべてのカラー")
             Divider().padding(.leading, 74)
             benefitRow(icon: "hand.raised.fill", color: Palette.mint,
-                       title: "作品は撮ったまま", detail: "変えるのは背景だけ。作品には手を加えません")
+                       title: "作品は撮ったまま", detail: "背景だけ変えて、作品はそのまま")
         }
         .background(RoundedRectangle(cornerRadius: 22).fill(.white))
         .shadow(color: .black.opacity(0.06), radius: 10, y: 4)
