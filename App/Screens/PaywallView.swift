@@ -48,6 +48,7 @@ struct PlanOption: Identifiable, Equatable {
 struct PaywallView: View {
     @Environment(SubscriptionStore.self) private var store
     @Environment(\.dismiss) private var dismiss
+    /// タップで選んだプラン。まだ選んでいなければ先頭（年額）を選んだことにする。
     @State private var selectedID: String?
     @State private var isPurchasing = false
     @State private var message: String?
@@ -129,9 +130,6 @@ struct PaywallView: View {
             crownBounce.toggle()
             if store.products.isEmpty && !LaunchOptions.paywallDemo {
                 await store.loadProducts()
-            }
-            if selectedID == nil {
-                selectedID = plans.first?.id
             }
         }
         .task {
@@ -292,7 +290,7 @@ struct PaywallView: View {
     }
 
     private func planCard(_ plan: PlanOption) -> some View {
-        let isSelected = selectedID == plan.id
+        let isSelected = currentPlanID == plan.id
         return Button {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                 selectedID = plan.id
@@ -377,6 +375,7 @@ struct PaywallView: View {
         }
         .buttonStyle(.plain)
         .disabled(isPurchasing || selectedProduct == nil)
+        .opacity(selectedProduct == nil ? 0.45 : 1)
         .padding(.horizontal, 20)
     }
 
@@ -421,8 +420,16 @@ struct PaywallView: View {
 
     // MARK: - 購入
 
+    /// プランの読み込みが画面を開いた後に終わっても、必ずどれかが選ばれているようにする。
+    private var currentPlanID: String? {
+        if let selectedID, plans.contains(where: { $0.id == selectedID }) {
+            return selectedID
+        }
+        return plans.first?.id
+    }
+
     private var selectedProduct: Product? {
-        store.products.first { $0.id == selectedID }
+        store.products.first { $0.id == currentPlanID }
     }
 
     private func buy() async {
