@@ -15,9 +15,18 @@ struct SakuhinCameraApp: App {
     }
 }
 
+/// 起動引数。CI のシミュレータで画面のスクリーンショットを撮るときに使う。
+enum LaunchOptions {
+    /// 起動直後にプレミアム画面を開く。
+    static let showsPaywall = ProcessInfo.processInfo.arguments.contains("-showPaywall")
+    /// ストアに接続せず、見本の料金でプランを表示する。
+    static let paywallDemo = ProcessInfo.processInfo.arguments.contains("-paywallDemo")
+}
+
 struct RootView: View {
     @State private var path: [Route] = []
     @State private var session = EditSession()
+    @State private var showsPaywallOnLaunch = LaunchOptions.showsPaywall
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -39,5 +48,8 @@ struct RootView: View {
                 }
         }
         .environment(session)
+        .sheet(isPresented: $showsPaywallOnLaunch) {
+            PaywallView()
+        }
     }
 }
