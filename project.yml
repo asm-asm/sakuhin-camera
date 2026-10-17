@@ -22,7 +22,7 @@ targets:
     info:
       path: App/Info.plist
       properties:
-        CFBundleDisplayName: 作品カメラ
+        CFBundleDisplayName: 作品用カメラ
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen: {}

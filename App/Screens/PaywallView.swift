@@ -160,7 +160,7 @@ struct PaywallView: View {
             }
             .padding(.top, 36)
 
-            Text("作品カメラ PREMIUM")
+            Text("作品用カメラ PREMIUM")
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .foregroundStyle(Palette.ink)
 

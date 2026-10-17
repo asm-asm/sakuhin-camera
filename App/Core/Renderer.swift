@@ -242,7 +242,7 @@ enum Renderer {
 
     // MARK: - 透かし
 
-    static let watermarkText = "作品カメラ"
+    static let watermarkText = "作品用カメラ"
 
     /// 右下に透かしを入れる。背景レイヤーに描くので作品の画素は変わらない。
     static func drawWatermark(on layer: inout RGBAImage) {

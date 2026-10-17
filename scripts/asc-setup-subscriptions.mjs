@@ -12,7 +12,7 @@ import { readFileSync } from "node:fs";
 import { basename } from "node:path";
 
 const BUNDLE_ID = "com.sammy.sakuhincamera";
-const GROUP_NAME_JA = "作品カメラ プレミアム";
+const GROUP_NAME_JA = "作品用カメラ プレミアム";
 const PLANS = {
   "com.sammy.sakuhincamera.premium.monthly": { name: "月額プラン", description: "透かしなし・全背景が使えます", priceJPY: "150" },
   "com.sammy.sakuhincamera.premium.yearly": { name: "年額プラン", description: "透かしなし・全背景が使えます", priceJPY: "1500" },
