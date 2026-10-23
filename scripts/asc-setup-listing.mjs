@@ -2,7 +2,8 @@
 // 文章は docs/store-listing.md の各見出しから読む（ここを直せば掲載文も変わる）。
 //
 // 使い方:
-//   ASC_KEY_PATH=... ASC_KEY_ID=... ASC_ISSUER_ID=... node scripts/asc-setup-listing.mjs [--apply] [--screenshots フォルダ]
+//   ASC_KEY_PATH=... ASC_KEY_ID=... ASC_ISSUER_ID=... node scripts/asc-setup-listing.mjs [--apply] [--screenshots フォルダ] [--version 1.0.1]
+//   --version を付けると、そのバージョンが App Store Connect になければ作る（アップデートの提出用）。
 //   --apply を付けないと、現在の状態を表示するだけで何も変更しない。
 //
 // API で設定できないもの（App のプライバシー、審査の連絡先）は App Store Connect の画面で行う。
@@ -14,6 +15,8 @@ const BUNDLE_ID = "com.sammy.sakuhincamera";
 const apply = process.argv.includes("--apply");
 const shotIndex = process.argv.indexOf("--screenshots");
 const screenshotDir = shotIndex > 0 ? process.argv[shotIndex + 1] : null;
+const versionIndex = process.argv.indexOf("--version");
+const newVersionString = versionIndex > 0 ? process.argv[versionIndex + 1] : null;
 
 // --- docs/store-listing.md を読む ---
 const markdown = readFileSync(new URL("../docs/store-listing.md", import.meta.url), "utf8");
@@ -30,13 +33,14 @@ const listing = {
   copyright: sections["著作権"],
   supportUrl: sections["URL"].match(/サポート：(\S+)/)[1],
   privacyPolicyUrl: sections["URL"].match(/プライバシーポリシー：(\S+)/)[1],
+  whatsNew: sections["このバージョンの新機能"],
   reviewNotes: sections["審査メモ"]
     .split("\n")
     .map((line) => line.replace(/^- /, "・"))
     .join("\n"),
 };
 for (const [key, value] of Object.entries(listing)) {
-  if (!value) throw new Error(`store-listing.md に「${key}」が見つからない`);
+  if (!value && key !== "whatsNew") throw new Error(`store-listing.md に「${key}」が見つからない`);
 }
 
 // --- API ---
@@ -89,12 +93,27 @@ async function step(label, fn) {
 }
 
 const app = (await api("GET", `/v1/apps?filter[bundleId]=${BUNDLE_ID}`)).data[0];
-const appInfo = (await api("GET", `/v1/apps/${app.id}/appInfos`)).data.find(
-  (info) => info.attributes.state !== "READY_FOR_DISTRIBUTION",
-);
-const version = (await getAll(`/v1/apps/${app.id}/appStoreVersions`)).find(
+// 編集できるアプリ情報（公開中のものしかなければそれを見る）
+const appInfos = (await api("GET", `/v1/apps/${app.id}/appInfos`)).data;
+const appInfo = appInfos.find((info) => info.attributes.state !== "READY_FOR_DISTRIBUTION") ?? appInfos[0];
+let version = (await getAll(`/v1/apps/${app.id}/appStoreVersions`)).find(
   (v) => v.attributes.appStoreState === "PREPARE_FOR_SUBMISSION",
 );
+if (!version && newVersionString) {
+  if (!apply) {
+    console.log(`バージョン ${newVersionString}: 未作成（--apply で作成）`);
+    process.exit(0);
+  }
+  version = (await api("POST", "/v1/appStoreVersions", {
+    data: {
+      type: "appStoreVersions",
+      attributes: { platform: "IOS", versionString: newVersionString },
+      relationships: { app: { data: { type: "apps", id: app.id } } },
+    },
+  })).data;
+  console.log(`バージョン ${newVersionString} を作成`);
+}
+if (!version) throw new Error("提出準備中のバージョンがない（--version で作成できる）");
 console.log(`アプリ ${app.attributes.name} / バージョン ${version.attributes.versionString}\n`);
 
 // 1. カテゴリ
@@ -138,8 +157,12 @@ await step("説明文・キーワード・サポートURL", async () => {
     (l) => l.attributes.locale === "ja",
   );
   const a = versionLocalization.attributes;
+  // 初めての版には「新機能」を入れられない（アップデートのときだけ）
+  const isUpdate = version.attributes.versionString !== "1.0";
+  const whatsNew = isUpdate ? listing.whatsNew : undefined;
   const same = a.description === listing.description && a.keywords === listing.keywords &&
-    a.promotionalText === listing.promotionalText && a.supportUrl === listing.supportUrl;
+    a.promotionalText === listing.promotionalText && a.supportUrl === listing.supportUrl &&
+    (!whatsNew || a.whatsNew === whatsNew);
   if (same) return "設定済み";
   if (!apply) return "未設定または内容が違う";
   await api("PATCH", `/v1/appStoreVersionLocalizations/${versionLocalization.id}`, {
@@ -151,6 +174,7 @@ await step("説明文・キーワード・サポートURL", async () => {
         keywords: listing.keywords,
         promotionalText: listing.promotionalText,
         supportUrl: listing.supportUrl,
+        ...(whatsNew ? { whatsNew } : {}),
       },
     },
   });
