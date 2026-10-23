@@ -1,5 +1,5 @@
 # クラウドの Mac で XcodeGen → ユニットテスト（シミュレータ）を実行する。
-# 手動実行で「upload」をオンにすると、署名して TestFlight（App Store Connect）へアップロードする。
+# 手動実行すると（upload は最初からオン）、署名して TestFlight（App Store Connect）へアップロードする。
 #
 # アップロードに必要な Secrets（Settings → Secrets and variables → Actions）:
 #   APPLE_TEAM_ID / ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_P8（.p8 の中身）
@@ -14,7 +14,7 @@ on:
       upload:
         description: "署名して TestFlight にアップロードする"
         type: boolean
-        default: false
+        default: true
 
 jobs:
   test:
