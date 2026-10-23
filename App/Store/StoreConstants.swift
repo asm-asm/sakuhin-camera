@@ -1,11 +1,11 @@
 import Foundation
 
-/// サブスクの商品ID。App Store Connect に同じIDで登録する。
+/// プレミアム（買い切り・非消耗型）の商品ID。App Store Connect に同じIDで登録する。
+/// 以前作ったサブスク（premium.monthly / premium.yearly）は使わない（審査にも出していない）。
 enum ProductIDs {
-    static let monthly = "com.sammy.sakuhincamera.premium.monthly"
-    static let yearly = "com.sammy.sakuhincamera.premium.yearly"
+    static let premium = "com.sammy.sakuhincamera.premium.lifetime"
 
-    static let all: Set<String> = [monthly, yearly]
+    static let all: Set<String> = [premium]
 }
 
 enum AppLinks {

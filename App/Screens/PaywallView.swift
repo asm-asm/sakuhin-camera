@@ -11,33 +11,14 @@ struct PlanOption: Identifiable, Equatable {
     let savings: String?
 
     static func make(from products: [Product]) -> [PlanOption] {
-        let monthly = products.first { $0.id == ProductIDs.monthly }
-        let yearly = products.first { $0.id == ProductIDs.yearly }
-        var options: [PlanOption] = []
-        if let yearly {
-            var savings: String?
-            if let monthly, monthly.price > 0 {
-                let full = monthly.price * 12
-                let ratio: Decimal = (full - yearly.price) / full * 100
-                let percent = Int(NSDecimalNumber(decimal: ratio).doubleValue.rounded())
-                if percent > 0 { savings = "\(percent)%おトク" }
-            }
-            options.append(PlanOption(id: yearly.id, title: "年額プラン", price: yearly.displayPrice + " / 年",
-                                      detail: "月あたり " + (yearly.price / 12).formatted(yearly.priceFormatStyle),
-                                      badge: "いちばんおトク", savings: savings))
-        }
-        if let monthly {
-            options.append(PlanOption(id: monthly.id, title: "月額プラン", price: monthly.displayPrice + " / 月",
-                                      detail: "まずは1か月から", badge: nil, savings: nil))
-        }
-        return options
+        guard let premium = products.first(where: { $0.id == ProductIDs.premium }) else { return [] }
+        return [PlanOption(id: premium.id, title: "プレミアム", price: premium.displayPrice,
+                           detail: "一度の購入でずっと使えます", badge: "買い切り", savings: nil)]
     }
 
     static let demo: [PlanOption] = [
-        PlanOption(id: ProductIDs.yearly, title: "年額プラン", price: "¥1,500 / 年", detail: "月あたり ¥125",
-                   badge: "いちばんおトク", savings: "17%おトク"),
-        PlanOption(id: ProductIDs.monthly, title: "月額プラン", price: "¥150 / 月", detail: "まずは1か月から",
-                   badge: nil, savings: nil),
+        PlanOption(id: ProductIDs.premium, title: "プレミアム", price: "¥480",
+                   detail: "一度の購入でずっと使えます", badge: "買い切り", savings: nil),
     ]
 }
 
@@ -369,7 +350,7 @@ struct PaywallView: View {
                 } else {
                     HStack(spacing: 8) {
                         Image(systemName: "sparkles")
-                        Text("プレミアムをはじめる")
+                        Text("プレミアムにする")
                     }
                     .font(.system(size: 19, weight: .heavy, design: .rounded))
                 }
@@ -410,7 +391,7 @@ struct PaywallView: View {
             .font(.system(size: 14, weight: .semibold))
             .tint(Palette.pink)
 
-            Text("サブスクリプションは、現在の期間が終わる24時間前までに解約しない限り自動で更新されます。料金は購入の確定時と更新時に Apple ID に請求されます。解約は「設定」アプリの Apple ID ＞ サブスクリプションから行えます。")
+            Text("買い切りのため、月額などの追加料金はかかりません。料金は購入の確定時に Apple ID に請求されます。機種変更や再インストールのときは「購入を復元」で復元できます。")
                 .font(.system(size: 11))
                 .foregroundStyle(Palette.subInk)
                 .multilineTextAlignment(.center)
@@ -561,7 +542,7 @@ struct PrivacyPolicyContent: View {
                 Text("写真ライブラリ").font(.headline)
                 Text("加工した写真を保存するために、写真ライブラリへの追加のみを行います。ライブラリ内の写真を読み取ることはありません。")
                 Text("購入").font(.headline)
-                Text("サブスクリプションの購入は Apple の App Store を通じて行われ、支払い情報をこのアプリが受け取ることはありません。")
+                Text("プレミアムの購入は Apple の App Store を通じて行われ、支払い情報をこのアプリが受け取ることはありません。")
                 Text("解析・広告").font(.headline)
                 Text("利用状況の解析や広告のための情報収集は行いません。")
             }

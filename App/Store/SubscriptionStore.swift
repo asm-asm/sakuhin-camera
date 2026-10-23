@@ -2,7 +2,7 @@ import Foundation
 import Observation
 import StoreKit
 
-/// StoreKit 2 のサブスク。有料版なら透かしなし・全背景。
+/// StoreKit 2 のアプリ内課金（プレミアム・買い切り）。購入済みなら透かしなし・全背景。
 @MainActor
 @Observable
 final class SubscriptionStore {
